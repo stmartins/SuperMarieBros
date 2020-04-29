@@ -11,62 +11,66 @@ import (
 )
 
 const (
-	windowWidth		= 640
-	windowHeigth	= 280
-	heroFrameWidth	= 110
-	heroFrameHeight	= 140
-	frameNum		= 12
-	frameOX			= 0
-	frameOY			= 10
+	windowWidth     = 640
+	windowHeigth    = 280
+	heroFrameWidth  = 110
+	heroFrameHeight = 140
+	frameNum        = 12
+	frameOX         = 0
+	frameOY         = 10
 
-	boxSize			= 32
-	boxImgPath		= "assets/game sprites/Sunny-land-files/PNG/environment/props/big-crate.png"
-	forestImg		= "assets/forest.png"
-	spritesPath		= "assets/game sprites/Sunny-land-files/PNG/sprites/"
+	boxSize     = 32
+	boxImgPath  = "assets/game sprites/Sunny-land-files/PNG/environment/props/big-crate.png"
+	forestImg   = "assets/forest.png"
+	spritesPath = "assets/game sprites/Sunny-land-files/PNG/sprites/"
 )
 
 var (
 	//rightHeroImg 	*ebiten.Image
 	//leftHeroImg 	*ebiten.Image
-	backgroundImg	*ebiten.Image
-	boxImg			*ebiten.Image
+	backgroundImg *ebiten.Image
+	boxImg        *ebiten.Image
 
-	framelineY		int
-	tmp				int
-	err				error
+	//framelineY		int
+	//tmp				int
+	//err				error
 	//playerOne		hero
-	characterAction	string
-	heroObj			Character
-	startHeigth		float64
-	goingUp			bool
-	goingDown		bool
-	goingUpImg		[]*ebiten.Image
+	characterAction string
+	heroObj         Character
+	startHeigth     float64
+	goingUp         bool
+	goingDown       bool
+	//goingUpImg		[]*ebiten.Image
 
-	cherryObj		SpritesObj
-	gemObj			SpritesObj
+	cherryObj SpritesObj
+	gemObj    SpritesObj
 )
 
 type SpritesObj struct {
-	spritePathPrefix	string
-	spriteName			string
-	frameWidth			int
-	frameHeight 		int
-	posX, posY			float64
-	spritesNumber		int
-	objImg				[]*ebiten.Image
+	spritePathPrefix string
+	spriteName       string
+	frameWidth       int
+	frameHeight      int
+	posX, posY       float64
+	spritesNumber    int
+	objImg           []*ebiten.Image
 }
 
 type MovesObj struct {
-	running				[]*ebiten.Image
-	idle				[]*ebiten.Image
-	jump				[]*ebiten.Image
+	runRight []*ebiten.Image
+	runLeft  []*ebiten.Image
+	idle     []*ebiten.Image
+	idleLeft []*ebiten.Image
+	jumpUp   []*ebiten.Image
+	jumpDown []*ebiten.Image
 }
 
-type  Character struct {
-	speed				float64
-	spriteObj			SpritesObj
-	movesObj			MovesObj
+type Character struct {
+	speed     float64
+	spriteObj SpritesObj
+	movesObj  MovesObj
 }
+
 //
 //type hero struct {
 //	heroImage		*ebiten.Image
@@ -75,69 +79,68 @@ type  Character struct {
 //}
 
 type Game struct {
-	count			int
-	gameTime		int
+	count    int
+	gameTime int
 }
 
-//func leftHeroImage()  {
-//	//playerOne.heroImage = leftHeroImg
-//}
-//
-//func rightHeroImage()  {
-//	//playerOne.heroImage = rightHeroImg
-//}
+func updateHeroImage(heroImage []*ebiten.Image) {
+	heroObj.spriteObj.objImg = heroImage
+}
 
 func (g *Game) checkKeyPressed() {
-	if ebiten.IsKeyPressed(ebiten.KeyRight) && heroObj.spriteObj.posX < windowWidth  - heroFrameWidth / 2 {
-		characterAction = "run-right"
-		//rightHeroImage()
+	if ebiten.IsKeyPressed(ebiten.KeyRight) && heroObj.spriteObj.posX < windowWidth-heroFrameWidth/4 {
+		characterAction = "run"
+		updateHeroImage(heroObj.movesObj.runRight)
 		g.count++
 		if g.count > 10 {
-			framelineY = 0
 			heroObj.spriteObj.posX += heroObj.speed
 		}
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyLeft) && heroObj.spriteObj.posX > 0 + heroFrameWidth / 2 {
-		characterAction = "run-left"
-		//leftHeroImage()
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) && heroObj.spriteObj.posX > 0 {
+		characterAction = "run"
+		updateHeroImage(heroObj.movesObj.runLeft)
 		g.count++
 		if g.count > 10 {
-			framelineY = 0
 			heroObj.spriteObj.posX -= heroObj.speed
-
 		}
 	}
+
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
 		characterAction = "jump-right"
-		if startHeigth == 0 {
+		if startHeigth == 0 && goingUp == false {
 			startHeigth = heroObj.spriteObj.posY
 			goingUp = true
 			goingDown = false
 		}
 	}
+
+	if inpututil.IsKeyJustReleased(ebiten.KeyRight) { //|| (goingUp == false && goingDown == false) {
+		updateHeroImage(heroObj.movesObj.idle)
+	}
+	if inpututil.IsKeyJustReleased(ebiten.KeyLeft) {
+		updateHeroImage(heroObj.movesObj.idleLeft)
+	}
+
 	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
 		os.Exit(1)
 	}
-	if inpututil.IsKeyJustReleased(ebiten.KeyRight) || inpututil.IsKeyJustReleased(ebiten.KeyLeft) || (goingUp == false && goingDown == false) {
-		characterAction = "idle"
-	}
 }
 
-func (g *Game)isKeyPressed()  {
+func (g *Game) isKeyPressed() {
 	g.checkKeyPressed()
-		//g.count = 0
-		//characterAction = "idle"
-		//framelineY = 300
+	//g.count = 0
+	//characterAction = "idle"
+	//framelineY = 300
 }
 
-func (g *Game)Update(screen *ebiten.Image) error {
+func (g *Game) Update(screen *ebiten.Image) error {
 
 	g.isKeyPressed()
 	g.gameTime++
 	return nil
 }
 
-func (g *Game)Draw(screen *ebiten.Image) {
+func (g *Game) Draw(screen *ebiten.Image) {
 	drawPngImage(screen, 0, 0, backgroundImg)
 	drawPngImage(screen, windowWidth/2, windowHeigth/2, boxImg)
 	drawPngImage(screen, windowWidth/2+boxSize, windowHeigth/2, boxImg)
@@ -149,9 +152,7 @@ func (g *Game)Draw(screen *ebiten.Image) {
 	//drawHero(screen, g.count)
 }
 
-
-
-func	drawPngImage(screen *ebiten.Image, xPos float64, yPos float64, imageToDraw *ebiten.Image)  {
+func drawPngImage(screen *ebiten.Image, xPos float64, yPos float64, imageToDraw *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	//positop ou faire le dessin specifie par xPos et yPos
 	op.GeoM.Translate(xPos, yPos)
@@ -160,7 +161,7 @@ func	drawPngImage(screen *ebiten.Image, xPos float64, yPos float64, imageToDraw 
 	}
 }
 
-func	drawSpritesImage(screen *ebiten.Image, obj SpritesObj, ticTime int) {
+func drawSpritesImage(screen *ebiten.Image, obj SpritesObj, ticTime int) {
 	if ticTime == 0 {
 		ticTime = 1
 	}
@@ -168,38 +169,40 @@ func	drawSpritesImage(screen *ebiten.Image, obj SpritesObj, ticTime int) {
 	drawPngImage(screen, obj.posX, obj.posY, obj.objImg[i])
 }
 
-func 	(g *Game)Layout(outsideWidth, outsideHeight int) (int, int) {
+func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return windowWidth, windowHeigth
 }
 
-func 	drawHeroCharacter(screen *ebiten.Image, character *Character, ticTime int) {
-	if goingUp == true {
-		characterAction = "jump-right"
-	}
-	if characterAction == "run-right" {
-		character.spriteObj.objImg = character.movesObj.running
+func drawHeroCharacter(screen *ebiten.Image, character *Character, ticTime int) {
+	//if goingUp == true {
+	//	characterAction = "jump-right"
+	//}
+	if characterAction == "run" {
 		ticTime *= 2
 	}
-	if characterAction == "idle" {
-		character.spriteObj.objImg = character.movesObj.idle
-	}
-	if characterAction == "jump-right" {
-
-		//character.spriteObj.objImg = goingUpImg
-		if character.spriteObj.posY == startHeigth - 20 {
+	if characterAction == "jump-right" || goingUp == true || goingDown == true {
+		ticTime = 1
+		jumpHeigth := heroObj.spriteObj.frameHeight * 2
+		//fmt.Println(len(heroObj.movesObj.jumpUp), "/", cap(heroObj.movesObj.jumpUp))
+		//character.spriteObj.objImg = character.movesObj.jump
+		if character.spriteObj.posY == startHeigth-float64(jumpHeigth) {
 			goingUp = false
 			goingDown = true
 		}
-		if character.spriteObj.posY > startHeigth - 20 && goingUp == true {
+		if character.spriteObj.posY > startHeigth-float64(jumpHeigth) && goingUp == true {
 			goingUp = true
 			goingDown = false
-			character.spriteObj.posY--
+			updateHeroImage(heroObj.movesObj.jumpUp)
+			character.spriteObj.posY -= heroObj.speed
 		} else if character.spriteObj.posY < startHeigth && goingDown == true {
 			goingUp = false
 			goingDown = true
-			character.spriteObj.posY++
+			updateHeroImage(heroObj.movesObj.jumpDown)
+			character.spriteObj.posY += heroObj.speed
 		} else {
 			goingUp, goingDown = false, false
+			updateHeroImage(heroObj.movesObj.idle)
+
 			startHeigth = 0
 		}
 	}
@@ -236,7 +239,7 @@ func 	drawHeroCharacter(screen *ebiten.Image, character *Character, ticTime int)
 //	return newImg
 //}
 
-func	initPngImageFromFile(path string) (*ebiten.Image) {
+func initPngImageFromFile(path string) *ebiten.Image {
 	imgFromFile, _, err := ebitenutil.NewImageFromFile(path, ebiten.FilterDefault)
 	if err != nil {
 		log.Fatal(err)
@@ -244,53 +247,55 @@ func	initPngImageFromFile(path string) (*ebiten.Image) {
 	return imgFromFile
 }
 
-func	makePngImageArray(spritesNumber int, prefix, name string) []*ebiten.Image {
+func makePngImageArray(spritesNumber int, prefix, name string) []*ebiten.Image {
 	imgArr := make([]*ebiten.Image, spritesNumber)
 	for i := 0; i < spritesNumber; i++ {
-		spriteName := prefix + "/" + name + "-" + strconv.Itoa(i + 1) + ".png"
+		spriteName := prefix + "/" + name + "-" + strconv.Itoa(i+1) + ".png"
 		path := spritesPath + spriteName
 		imgArr[i] = initPngImageFromFile(path)
 	}
 	return imgArr
 }
 
-func	initSpriteObj(pathPrefix string, name string, frameWith, frameHeight int ,  posX, posY float64, spriteNumber int) SpritesObj {
-	obj := SpritesObj{pathPrefix,name, frameWith, frameHeight, posX, posY, spriteNumber, nil}
+func initSpriteObj(pathPrefix string, name string, frameWith, frameHeight int, posX, posY float64, spriteNumber int) SpritesObj {
+	obj := SpritesObj{pathPrefix, name, frameWith, frameHeight, posX, posY, spriteNumber, nil}
 
 	obj.objImg = makePngImageArray(obj.spritesNumber, obj.spritePathPrefix, obj.spriteName)
 	return obj
 }
 
-func initCharacters(posX, posY, speed float64, pathPrefix, name string, frameWidth, frameHeight, frameNumber int) Character  {
-	characterObj	:= initSpriteObj(pathPrefix, name, frameWidth,frameHeight,posX, posY, frameNumber)
-	runningArray	:= makePngImageArray(6, "player/run", "player-run")
-	idleArray		:= makePngImageArray(4, "player/idle","player-idle")
-	jumpArray		:= makePngImageArray(2, "player/jump", "player-jump")
+func initCharacters(posX, posY, speed float64, pathPrefix, name string, frameWidth, frameHeight, frameNumber int) Character {
+	characterObj := initSpriteObj(pathPrefix, name, frameWidth, frameHeight, posX, posY, frameNumber)
+	runRightArray := makePngImageArray(6, "player/run", "player-run")
+	runLeftArray := makePngImageArray(6, "player/run", "player-run-left")
+	idleArray := makePngImageArray(4, "player/idle", "player-idle")
+	idleLeftArray := makePngImageArray(4, "player/idle", "player-idle-left")
+	jumpUpArray := makePngImageArray(1, "player/jump", "player-jump-up")
+	jumpDownArray := makePngImageArray(1, "player/jump", "player-jump-down")
+
 	//goingUpImg = make([]*ebiten.Image, 1)
 	//goingUpImg[0] = jumpArray[0]
 	character := Character{speed, characterObj,
-					MovesObj{runningArray, idleArray, jumpArray}}
+		MovesObj{runRightArray, runLeftArray, idleArray, idleLeftArray,
+			jumpUpArray, jumpDownArray}}
 	return character
 }
 
 func init() {
-	startHeigth 	= 0
+	startHeigth = 0
+	goingUp = false
+	goingDown = false
 
-	backgroundImg 	= initPngImageFromFile(forestImg)
-	boxImg			= initPngImageFromFile(boxImgPath)
+	backgroundImg = initPngImageFromFile(forestImg)
+	boxImg = initPngImageFromFile(boxImgPath)
 
-	cherryObj		= initSpriteObj("cherry","cherry",21, 21, windowWidth / 2,
-										windowHeigth / 2,7)
-	gemObj			= initSpriteObj("gem","gem", 15, 13,
-										windowWidth / 2 - float64(cherryObj.frameWidth - 5), windowHeigth / 2, 5)
+	cherryObj = initSpriteObj("cherry", "cherry", 21, 21, windowWidth/2,
+		windowHeigth/2, 7)
+	gemObj = initSpriteObj("gem", "gem", 15, 13,
+		windowWidth/2-float64(cherryObj.frameWidth-5), windowHeigth/2, 5)
 
-	//rightHeroImg 	= initImageFromBytes(images.ImageMarie)
-	//leftHeroImg 	= initImageFromBytes(images.FlipImageMarie)
-
-	heroObj			= initCharacters(20, float64(windowHeigth - 60),4, "player/idle",
-										"player-idle", 33, 32, 4)
-
-	//playerOne = hero{rightHeroImg, 20, windowHeigth - 200, 4}
+	heroObj = initCharacters(20, float64(windowHeigth-60), 4, "player/idle",
+		"player-idle", 33, 32, 4)
 }
 
 func RunGame() {
