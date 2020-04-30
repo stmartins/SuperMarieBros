@@ -134,6 +134,8 @@ func (g *Game) checkKeyPressed() {
 	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
 		os.Exit(1)
 	}
+
+	updateMap()
 }
 
 func (g *Game) isKeyPressed() {
@@ -161,14 +163,21 @@ func updateHeroImage(heroImageRight []*ebiten.Image, heroImageLeft []*ebiten.Ima
 func (g *Game) drawMap() {
 	for y, line := range gameMaps.MapLevel1 {
 		fmt.Println("y:", y, "line:", line)
-		for x, v := range line {
-			if v == 1 {
+		for x, value := range line {
+			if value == 1 {
 				g.drawPngImage(float64(x*boxImg.frameHeigth), float64(y*boxImg.frameWidth), boxImg.image)
+			} else if value == 99 {
+				//TODO
+				//heroObj.spriteObj.posX = float64(x * boxImg.frameWidth)
+				//heroObj.spriteObj.posY = float64(y * boxImg.frameHeigth)
 			}
 		}
-
 	}
 	fmt.Println("")
+}
+
+func updateMap() {
+	//	TODO
 }
 
 func (g *Game) drawBackGround(img ImageObj) {
