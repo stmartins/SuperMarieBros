@@ -1,9 +1,9 @@
 package main
 
 import (
-	"SuperMarieBros/RunGame"
+	"SuperMarieBros/runGame"
 )
 
 func main() {
-	RunGame.RunGame()
+	runGame.RunGame()
 }
