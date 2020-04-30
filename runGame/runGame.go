@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	windowWidth     = 640
+	windowWidth     = 928
 	windowHeigth    = 288
 	heroFrameWidth  = 110
 	heroFrameHeight = 140
@@ -23,13 +23,15 @@ const (
 
 	boxSize     = 32
 	boxImgPath  = "assets/game sprites/Sunny-land-files/PNG/environment/props/big-crate.png"
-	forestImg   = "assets/forest.png"
+	forestImg   = "assets/game sprites/Sunny-land-files/PNG/environment/layers/back.png"
+	housePath   = "assets/game sprites/Sunny-land-files/PNG/environment/props/house.png"
 	spritesPath = "assets/game sprites/Sunny-land-files/PNG/sprites/"
 )
 
 var (
-	backgroundImg *ebiten.Image
-	boxImg        *ebiten.Image
+	backgroundImg ImageObj
+	boxImg        ImageObj
+	houseImg      ImageObj
 
 	characterAction    string
 	characterDirection string
@@ -42,6 +44,12 @@ var (
 	cherryObj SpritesObj
 	gemObj    SpritesObj
 )
+
+type ImageObj struct {
+	image       *ebiten.Image
+	frameWidth  int
+	frameHeigth int
+}
 
 type SpritesObj struct {
 	spritePathPrefix string
@@ -155,7 +163,7 @@ func (g *Game) drawMap() {
 		fmt.Println("y:", y, "line:", line)
 		for x, v := range line {
 			if v == 1 {
-				g.drawPngImage(float64(x*32), float64(y*32), boxImg)
+				g.drawPngImage(float64(x*boxImg.frameHeigth), float64(y*boxImg.frameWidth), boxImg.image)
 			}
 		}
 
@@ -163,21 +171,29 @@ func (g *Game) drawMap() {
 	fmt.Println("")
 }
 
-func (g *Game) Draw(screen *ebiten.Image) {
-	g.screen = screen
+func (g *Game) drawBackGround(img ImageObj) {
+	for x := 0; x < windowWidth; x += img.frameWidth {
+		g.drawPngImage(float64(x), 32, img.image)
+	}
+}
 
-	g.drawPngImage(0, 0, backgroundImg)
-	//g.drawPngImage(windowWidth/2, windowHeigth/2, boxImg)
-	g.drawPngImage(windowWidth/2+boxSize, windowHeigth/2, boxImg)
+func (g *Game) drawDecoration() {
+	g.drawBackGround(backgroundImg)
+
+	g.drawPngImage(320, float64(windowHeigth-(32+houseImg.frameHeigth)), houseImg.image)
 
 	g.drawSpritesImage(cherryObj, g.gameTime)
 	g.drawSpritesImage(gemObj, g.gameTime)
+}
+
+func (g *Game) Draw(screen *ebiten.Image) {
+	g.screen = screen
+
+	g.drawDecoration()
 
 	g.drawMap()
 
-	//drawHeroCharacter(screen, &heroObj, g.gameTime)
 	g.drawHeroCharacter(&heroObj, g.gameTime)
-	//drawHero(screen, g.count)
 }
 
 func (g *Game) drawPngImage(xPos float64, yPos float64, imageToDraw *ebiten.Image) {
@@ -268,6 +284,14 @@ func (g *Game) drawHeroCharacter(character *Character, ticTime int) {
 //	return newImg
 //}
 
+func initImageObjFromFile(path string, frameWidth, frameHeigth int) ImageObj {
+	imgFromFile, _, err := ebitenutil.NewImageFromFile(path, ebiten.FilterDefault)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return ImageObj{imgFromFile, frameWidth, frameHeigth}
+}
+
 func initPngImageFromFile(path string) *ebiten.Image {
 	imgFromFile, _, err := ebitenutil.NewImageFromFile(path, ebiten.FilterDefault)
 	if err != nil {
@@ -318,8 +342,9 @@ func init() {
 	goingUp = false
 	goingDown = false
 
-	backgroundImg = initPngImageFromFile(forestImg)
-	boxImg = initPngImageFromFile(boxImgPath)
+	backgroundImg = initImageObjFromFile(forestImg, 384, 240)
+	boxImg = initImageObjFromFile(boxImgPath, 32, 32)
+	houseImg = initImageObjFromFile(housePath, 87, 108)
 
 	cherryObj = initSpriteObj("cherry", "cherry", 21, 21, windowWidth/2,
 		windowHeigth/2, 7)
