@@ -108,7 +108,6 @@ func (g *Game) checkKeyPressed() {
 	if ebiten.IsKeyPressed(ebiten.KeyRight) && heroObj.spriteObj.posX < windowWidth-heroFrameWidth/4 {
 		characterAction = "run"
 		characterDirection = "right"
-		//updateHeroImage(heroObj.movesObj.runRight)
 		g.gameTime++
 
 		if g.gameTime > 10 {
@@ -123,7 +122,6 @@ func (g *Game) checkKeyPressed() {
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) && heroObj.spriteObj.posX > 0 {
 		characterAction = "run"
 		characterDirection = "left"
-		//updateHeroImage(heroObj.movesObj.runLeft)
 		g.gameTime++
 		if g.gameTime > 10 {
 			heroObj.spriteObj.posX -= heroObj.speed
