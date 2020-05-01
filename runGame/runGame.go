@@ -29,6 +29,8 @@ const (
 )
 
 var (
+	mapDrawed bool
+
 	backgroundImg ImageObj
 	boxImg        ImageObj
 	houseImg      ImageObj
@@ -78,36 +80,58 @@ type Character struct {
 	movesObj  MovesObj
 }
 
-//
-//type hero struct {
-//	heroImage		*ebiten.Image
-//	xPos, yPos		float64
-//	speed			float64
-//}
-
 type Game struct {
-	count    int
+	//count    			int
 	gameTime int
 	screen   *ebiten.Image
 }
 
+func setHeroMapPostionToZero() {
+	x := int(heroObj.spriteObj.posX) / 32
+	y := int(heroObj.spriteObj.posY) / 32
+
+	//if x != heroTmpX || y != heroTmpY {
+	gameMaps.MapLevel1[y][x] = 0
+	//}
+}
+
+func positionToCoord() (int, int) {
+	y := int(heroObj.spriteObj.posY) / 32
+	x := int(heroObj.spriteObj.posX) / 32
+	return x, y
+}
+
 func (g *Game) checkKeyPressed() {
+
+	setHeroMapPostionToZero()
+
 	if ebiten.IsKeyPressed(ebiten.KeyRight) && heroObj.spriteObj.posX < windowWidth-heroFrameWidth/4 {
 		characterAction = "run"
 		characterDirection = "right"
 		//updateHeroImage(heroObj.movesObj.runRight)
-		g.count++
-		if g.count > 10 {
+		g.gameTime++
+
+		if g.gameTime > 10 {
 			heroObj.spriteObj.posX += heroObj.speed
+		}
+		x, y := positionToCoord()
+
+		if gameMaps.MapLevel1[y][x] != 0 {
+			heroObj.spriteObj.posX -= heroObj.speed
 		}
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) && heroObj.spriteObj.posX > 0 {
 		characterAction = "run"
 		characterDirection = "left"
 		//updateHeroImage(heroObj.movesObj.runLeft)
-		g.count++
-		if g.count > 10 {
+		g.gameTime++
+		if g.gameTime > 10 {
 			heroObj.spriteObj.posX -= heroObj.speed
+		}
+		x, y := positionToCoord()
+
+		if gameMaps.MapLevel1[y][x] != 0 {
+			heroObj.spriteObj.posX += heroObj.speed
 		}
 	}
 
@@ -166,18 +190,27 @@ func (g *Game) drawMap() {
 		for x, value := range line {
 			if value == 1 {
 				g.drawPngImage(float64(x*boxImg.frameHeigth), float64(y*boxImg.frameWidth), boxImg.image)
-			} else if value == 99 {
+			} else if value == 99 && mapDrawed == false {
 				//TODO
-				//heroObj.spriteObj.posX = float64(x * boxImg.frameWidth)
-				//heroObj.spriteObj.posY = float64(y * boxImg.frameHeigth)
+				heroObj.spriteObj.posX = float64(x * boxImg.frameWidth)
+				heroObj.spriteObj.posY = float64(y * boxImg.frameHeigth)
+				mapDrawed = true
 			}
 		}
 	}
-	fmt.Println("")
+	mapDrawed = true
+	fmt.Println("x:", heroObj.spriteObj.posX, " y:", heroObj.spriteObj.posY)
 }
 
 func updateMap() {
 	//	TODO
+	// x = 29 de largeur
+	x := int(heroObj.spriteObj.posX) / 32
+	y := int(heroObj.spriteObj.posY) / 32
+	gameMaps.MapLevel1[y][x] = 99
+
+	//fmt.Println("in update x=", int(x))
+
 }
 
 func (g *Game) drawBackGround(img ImageObj) {
