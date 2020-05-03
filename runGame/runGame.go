@@ -98,7 +98,7 @@ func setHeroMapPostionToZero() {
 }
 
 func getPositionCoord() (int, int) {
-	x := int(heroObj.spriteObj.posX) / 32
+	x := int(heroObj.spriteObj.posX+(float64(heroObj.spriteObj.frameWidth/2))) / 32
 	y := int(heroObj.spriteObj.posY) / 32
 	return x, y
 }
@@ -169,7 +169,7 @@ func (g *Game) checkKeyPressed() {
 		}
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyUp) {
+	if ebiten.IsKeyPressed(ebiten.KeySpace) {
 		characterAction = "jump"
 		if startHeigth == 0 && goingUp == false {
 			startHeigth = heroObj.spriteObj.posY
@@ -335,7 +335,7 @@ func (g *Game) drawHeroCharacter(character *Character, ticTime int) {
 	}
 	if canFall() == false {
 		goingDown = false
-		characterAction = "idle"
+		//characterAction = "idle"
 	}
 	if characterAction == "idle" {
 		updateHeroImage(heroObj.movesObj.idle, heroObj.movesObj.idleLeft)
@@ -442,7 +442,7 @@ func init() {
 	oldX = 32 / 32
 	oldY = (windowHeigth - 64) / 32
 
-	heroObj = initCharacters(32, float64(windowHeigth-64), 4, "player/idle",
+	heroObj = initCharacters(32, float64(windowHeigth-64), 3, "player/idle",
 		"player-idle", 33, 32, 4)
 }
 
