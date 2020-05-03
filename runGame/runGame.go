@@ -110,17 +110,13 @@ func SetOldPositionCoord() {
 
 func isObstacle(posX, posY float64) bool {
 	var x, y int
-	//if symbol == "+" {
-	//x = int((heroObj.spriteObj.posX + heroObj.speed ) / 32)
-	x = int(posX+float64(heroObj.spriteObj.frameWidth/2)) / 32
-	y = int(posY+float64(heroObj.spriteObj.frameHeight-1)) / 32
-	fmt.Println("x===", x, "y====", y)
 
-	//} else if symbol == "-" {
-	//	x = int((heroObj.spriteObj.posX - heroObj.speed) / 32)
-	//	y = int(heroObj.spriteObj.posY / 32)
-	//}
-	if gameMaps.MapLevel1[y][x] != 0 && gameMaps.MapLevel1[y][x] != 99 {
+	x = int(posX) / 32
+	y = int(posY+float64(heroObj.spriteObj.frameHeight-1)) / 32
+	//fmt.Println("x===", x, "y====", y)
+
+	//if gameMaps.MapLevel1[y][x] != 0 || gameMaps.MapLevel1[y][x] != 99 {
+	if gameMaps.MapLevel1[y][x] == 1 {
 		return true
 	}
 	return false
@@ -128,7 +124,7 @@ func isObstacle(posX, posY float64) bool {
 
 func canFall() bool {
 	x, y := getPositionCoord()
-	if gameMaps.MapLevel1[y+1][x] == 0 {
+	if gameMaps.MapLevel1[y+1][x] != 1 {
 		return true
 	}
 	return false
@@ -143,13 +139,15 @@ func (g *Game) checkKeyPressed() {
 		g.gameTime++
 
 		if g.gameTime > 10 {
-			if isObstacle(heroObj.spriteObj.posX+heroObj.speed, heroObj.spriteObj.posY) == false {
+			if isObstacle(heroObj.spriteObj.posX+heroObj.speed+22, heroObj.spriteObj.posY) == false {
 				heroObj.spriteObj.posX += heroObj.speed
 				SetOldPositionCoord()
 			}
 			if canFall() == true {
 				goingDown = true
 				characterAction = "jump"
+			} else {
+				goingDown = false
 			}
 		}
 	}
@@ -165,6 +163,8 @@ func (g *Game) checkKeyPressed() {
 			if canFall() == true {
 				goingDown = true
 				characterAction = "jump"
+			} else {
+				goingDown = false
 			}
 		}
 	}
@@ -282,7 +282,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 func (g *Game) drawPngImage(xPos float64, yPos float64, imageToDraw *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
-	//positop ou faire le dessin specifie par xPos et yPos
+	//positon ou faire le dessin specifie par xPos et yPos
 	op.GeoM.Translate(xPos, yPos)
 	if err := g.screen.DrawImage(imageToDraw, op); err != nil {
 		log.Fatal("Draw Image Error in drawPngImage")
@@ -302,9 +302,6 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func (g *Game) drawHeroCharacter(character *Character, ticTime int) {
-	//if goingUp == true {
-	//	characterAction = "jump-right"
-	//}
 
 	if characterAction == "run" && (goingUp == false && goingDown == false) {
 		ticTime *= 2
@@ -335,6 +332,10 @@ func (g *Game) drawHeroCharacter(character *Character, ticTime int) {
 			goingUp, goingDown = false, false
 			startHeigth = 0
 		}
+	}
+	if canFall() == false {
+		goingDown = false
+		characterAction = "idle"
 	}
 	if characterAction == "idle" {
 		updateHeroImage(heroObj.movesObj.idle, heroObj.movesObj.idleLeft)
