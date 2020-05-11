@@ -45,8 +45,10 @@ var (
 
 	heroObj Character
 
-	cherryObj SpritesObj
-	gemObj    SpritesObj
+	cherryObj   SpritesObj
+	gemObj      SpritesObj
+	frogObj     SpritesObj
+	frogJumpObj SpritesObj
 )
 
 type ImageObj struct {
@@ -83,7 +85,7 @@ type Character struct {
 }
 
 type Game struct {
-	//count    			int
+	count    int
 	gameTime int
 	screen   *ebiten.Image
 }
@@ -217,6 +219,7 @@ func (g *Game) Update(screen *ebiten.Image) error {
 
 	g.isKeyPressed()
 
+	g.count++
 	g.gameTime++
 	return nil
 }
@@ -266,13 +269,40 @@ func (g *Game) drawBackGround(img ImageObj) {
 	}
 }
 
+var frogJumping bool
+var idx int
+
 func (g *Game) drawDecoration() {
 	g.drawBackGround(backgroundImg)
 
 	g.drawPngImage(320, float64(windowHeigth-(32+houseImg.frameHeigth)), houseImg.image)
+	g.drawPngImage(820, float64(windowHeigth-(32+houseImg.frameHeigth)), houseImg.image)
 
-	g.drawSpritesImage(cherryObj, g.gameTime)
-	g.drawSpritesImage(gemObj, g.gameTime)
+	g.drawSpritesImage(cherryObj, g.count)
+	g.drawSpritesImage(gemObj, g.count)
+	if g.count%100 == 0 {
+		frogJumping = true
+		idx = 0
+	}
+	if frogJumping == false && frogObj.posX > 0 {
+		g.drawSpritesImage(frogObj, g.count)
+	} else {
+		if idx == 40 {
+			frogJumping = false
+			idx = 0
+		} else if idx < 20 {
+			frogJumpObj.posY -= 2
+			g.drawSpritesImage(frogJumpObj, 1)
+		} else if idx >= 20 {
+			frogJumpObj.posY += 2
+			g.drawSpritesImage(frogJumpObj, 15)
+		}
+		idx++
+
+		frogJumpObj.posX -= 2
+		frogObj.posX -= 2
+	}
+
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -445,6 +475,8 @@ func init() {
 	gemObj = initSpriteObj("gem", "gem", 15, 13,
 		windowWidth/2-float64(cherryObj.frameWidth-5), windowHeigth/2, 5)
 
+	frogObj = initSpriteObj("frog/idle", "frog-idle", 35, 32, 398, 230, 4)
+	frogJumpObj = initSpriteObj("frog/jump", "frog-jump", 35, 33, 398, 230, 2)
 	oldX = 32 / 32
 	oldY = (windowHeigth - 64) / 32
 
