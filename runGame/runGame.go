@@ -103,7 +103,7 @@ func getPositionCoord() (int, int) {
 	return x, y
 }
 
-func SetOldPositionCoord() {
+func setOldPositionCoord() {
 	oldY = int(heroObj.spriteObj.posY) / 32
 	oldX = int(heroObj.spriteObj.posX) / 32
 }
@@ -112,7 +112,7 @@ func isObstacle(posX, posY float64) bool {
 	var x, y int
 
 	x = int(posX) / 32
-	y = int(posY+float64(heroObj.spriteObj.frameHeight-1)) / 32
+	y = int(posY+float64(heroObj.spriteObj.frameHeight-4)) / 32
 	//fmt.Println("x===", x, "y====", y)
 
 	//if gameMaps.MapLevel1[y][x] != 0 || gameMaps.MapLevel1[y][x] != 99 {
@@ -124,11 +124,13 @@ func isObstacle(posX, posY float64) bool {
 
 func canFall() bool {
 	x, y := getPositionCoord()
+	fmt.Println("x:", x, " y:", y)
 	if gameMaps.MapLevel1[y+1][x] != 1 {
 		return true
 	}
 	return false
 }
+
 func (g *Game) checkKeyPressed() {
 
 	setHeroMapPostionToZero()
@@ -141,13 +143,15 @@ func (g *Game) checkKeyPressed() {
 		if g.gameTime > 10 {
 			if isObstacle(heroObj.spriteObj.posX+heroObj.speed+22, heroObj.spriteObj.posY) == false {
 				heroObj.spriteObj.posX += heroObj.speed
-				SetOldPositionCoord()
+				setOldPositionCoord()
 			}
 			if canFall() == true {
 				goingDown = true
 				characterAction = "jump"
 			} else {
 				goingDown = false
+				goingUp = false
+				startHeigth = 0
 			}
 		}
 	}
@@ -158,13 +162,15 @@ func (g *Game) checkKeyPressed() {
 		if g.gameTime > 10 {
 			if isObstacle(heroObj.spriteObj.posX-heroObj.speed, heroObj.spriteObj.posY) == false {
 				heroObj.spriteObj.posX -= heroObj.speed
-				SetOldPositionCoord()
+				setOldPositionCoord()
 			}
 			if canFall() == true {
 				goingDown = true
 				characterAction = "jump"
 			} else {
+				goingUp = false
 				goingDown = false
+				startHeigth = 0
 			}
 		}
 	}
@@ -181,12 +187,10 @@ func (g *Game) checkKeyPressed() {
 	if inpututil.IsKeyJustReleased(ebiten.KeyRight) { //|| (goingUp == false && goingDown == false) {
 		characterAction = "idle"
 		characterDirection = "right"
-		//updateHeroImage(heroObj.movesObj.idle)
 	}
 	if inpututil.IsKeyJustReleased(ebiten.KeyLeft) {
 		characterAction = "idle"
 		characterDirection = "left"
-		//updateHeroImage(heroObj.movesObj.idleLeft)
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
@@ -212,6 +216,7 @@ func (g *Game) isKeyPressed() {
 func (g *Game) Update(screen *ebiten.Image) error {
 
 	g.isKeyPressed()
+
 	g.gameTime++
 	return nil
 }
@@ -247,9 +252,9 @@ func (g *Game) drawMap() {
 func updateMap() {
 	//	TODO
 	// x = 29 de largeur
-	x := int(heroObj.spriteObj.posX) / 32
-	y := int(heroObj.spriteObj.posY) / 32
-	gameMaps.MapLevel1[y][x] = 99
+	//x := int(heroObj.spriteObj.posX) / 32
+	//y := int(heroObj.spriteObj.posY) / 32
+	//gameMaps.MapLevel1[y][x] = 99
 
 	//fmt.Println("in update x=", int(x))
 
@@ -319,15 +324,15 @@ func (g *Game) drawHeroCharacter(character *Character, ticTime int) {
 			goingDown = false
 			updateHeroImage(heroObj.movesObj.jumpUp, heroObj.movesObj.jumpUpLeft)
 			character.spriteObj.posY -= heroObj.speed
-		} else if (character.spriteObj.posY < startHeigth && goingDown == true) || canFall() == true {
+		} else if canFall() == true {
 			goingUp = false
 			goingDown = true
-			if isObstacle(character.spriteObj.posX, character.spriteObj.posY+heroObj.speed) == false {
-				character.spriteObj.posY += heroObj.speed
-				updateHeroImage(heroObj.movesObj.jumpDown, heroObj.movesObj.jumpDownLeft)
-			} else {
-				goingUp, goingDown = false, false
-			}
+			//if isObstacle(character.spriteObj.posX, character.spriteObj.posY+heroObj.speed) == false {
+			character.spriteObj.posY += heroObj.speed
+			//updateHeroImage(heroObj.movesObj.jumpDown, heroObj.movesObj.jumpDownLeft)
+			//} else {
+			//	goingUp, goingDown = false, false
+			//}
 		} else {
 			goingUp, goingDown = false, false
 			startHeigth = 0
@@ -341,6 +346,7 @@ func (g *Game) drawHeroCharacter(character *Character, ticTime int) {
 		updateHeroImage(heroObj.movesObj.idle, heroObj.movesObj.idleLeft)
 	}
 	g.drawSpritesImage(character.spriteObj, ticTime)
+	ebitenutil.DebugPrint(g.screen, characterAction)
 
 }
 
