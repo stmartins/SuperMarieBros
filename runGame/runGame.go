@@ -49,6 +49,11 @@ var (
 	gemObj      SpritesObj
 	frogObj     SpritesObj
 	frogJumpObj SpritesObj
+
+	frog        Frog
+	frogJumping bool
+	idx         int
+	count       int
 )
 
 type ImageObj struct {
@@ -88,6 +93,16 @@ type Game struct {
 	count    int
 	gameTime int
 	screen   *ebiten.Image
+}
+
+type FrogMoves struct {
+	idle []*ebiten.Image
+	jump []*ebiten.Image
+}
+
+type Frog struct {
+	spriteObj SpritesObj
+	FrogMoves FrogMoves
 }
 
 func setHeroMapPostionToZero() {
@@ -269,8 +284,32 @@ func (g *Game) drawBackGround(img ImageObj) {
 	}
 }
 
-var frogJumping bool
-var idx int
+func (g *Game) drawFrog() {
+	if g.count%100 == 0 {
+		frogJumping = true
+		idx = 0
+	}
+	if frogJumping == false && frog.spriteObj.posX > 0 {
+		frog.spriteObj.objImg = frog.FrogMoves.idle
+		count = g.count
+	} else {
+		if idx == 40 {
+			frog.spriteObj.objImg = frog.FrogMoves.idle
+			frogJumping = false
+			idx = 0
+		} else if idx < 20 {
+			frog.spriteObj.objImg = frog.FrogMoves.jump
+			frog.spriteObj.posY -= 2
+			count = 1
+		} else if idx >= 20 {
+			frog.spriteObj.posY += 2
+			count = 15
+		}
+		idx++
+		frog.spriteObj.posX -= 2
+	}
+	g.drawSpritesImage(frog.spriteObj, count)
+}
 
 func (g *Game) drawDecoration() {
 	g.drawBackGround(backgroundImg)
@@ -280,29 +319,8 @@ func (g *Game) drawDecoration() {
 
 	g.drawSpritesImage(cherryObj, g.count)
 	g.drawSpritesImage(gemObj, g.count)
-	if g.count%100 == 0 {
-		frogJumping = true
-		idx = 0
-	}
-	if frogJumping == false && frogObj.posX > 0 {
-		g.drawSpritesImage(frogObj, g.count)
-	} else {
-		if idx == 40 {
-			frogJumping = false
-			idx = 0
-		} else if idx < 20 {
-			frogJumpObj.posY -= 2
-			g.drawSpritesImage(frogJumpObj, 1)
-		} else if idx >= 20 {
-			frogJumpObj.posY += 2
-			g.drawSpritesImage(frogJumpObj, 15)
-		}
-		idx++
 
-		frogJumpObj.posX -= 2
-		frogObj.posX -= 2
-	}
-
+	g.drawFrog()
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -461,6 +479,20 @@ func initCharacters(posX, posY, speed float64, pathPrefix, name string, frameWid
 	return character
 }
 
+func initFrog(posX, posY, speed float64, pathPrefix, name string, frameWidth, frameHeight, frameNumber int) Frog {
+	frogOb := initSpriteObj(pathPrefix, name, frameWidth, frameHeight, posX, posY, frameNumber)
+	jump := makePngImageArray(2, "frog/jump", "frog-jump")
+	idle := makePngImageArray(4, "frog/idle", "frog-idle")
+	frog := Frog{
+		spriteObj: frogOb,
+		FrogMoves: FrogMoves{
+			idle: idle,
+			jump: jump,
+		},
+	}
+	return frog
+}
+
 func init() {
 	startHeigth = 0
 	goingUp = false
@@ -477,6 +509,7 @@ func init() {
 
 	frogObj = initSpriteObj("frog/idle", "frog-idle", 35, 32, 398, 230, 4)
 	frogJumpObj = initSpriteObj("frog/jump", "frog-jump", 35, 33, 398, 230, 2)
+	frog = initFrog(398, 230, 3, "frog/idle", "frog-idle", 35, 32, 4)
 	oldX = 32 / 32
 	oldY = (windowHeigth - 64) / 32
 
