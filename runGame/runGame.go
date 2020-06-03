@@ -1,6 +1,8 @@
 package runGame
 
 import (
+	"SuperMarieBros/env"
+	"SuperMarieBros/frogUtils"
 	"SuperMarieBros/gameMaps"
 	"fmt"
 	"github.com/hajimehoshi/ebiten"
@@ -11,22 +13,28 @@ import (
 	"strconv"
 )
 
+type Game struct {
+	Count    int
+	GameTime int
+	Screen   *ebiten.Image
+}
+
 func getPositionCoord() (int, int) {
-	x := int(HeroObj.SpriteObj.PosX+(float64(HeroObj.SpriteObj.FrameWidth/2))) / 32
-	y := int(HeroObj.SpriteObj.PosY) / 32
+	x := int(env.HeroObj.SpriteObj.PosX+(float64(env.HeroObj.SpriteObj.FrameWidth/2))) / 32
+	y := int(env.HeroObj.SpriteObj.PosY) / 32
 	return x, y
 }
 
 func setOldPositionCoord() {
-	OldY = int(HeroObj.SpriteObj.PosY) / 32
-	OldX = int(HeroObj.SpriteObj.PosX) / 32
+	env.OldY = int(env.HeroObj.SpriteObj.PosY) / 32
+	env.OldX = int(env.HeroObj.SpriteObj.PosX) / 32
 }
 
 func isObstacle(PosX, PosY float64) bool {
 	var x, y int
 
 	x = int(PosX) / 32
-	y = int(PosY+float64(HeroObj.SpriteObj.FrameHeight-4)) / 32
+	y = int(PosY+float64(env.HeroObj.SpriteObj.FrameHeight-4)) / 32
 
 	if gameMaps.MapLevel1[y][x] == 1 {
 		return true
@@ -44,62 +52,62 @@ func canFall() bool {
 }
 
 func (g *Game) checkKeyPressed() {
-	if ebiten.IsKeyPressed(ebiten.KeyRight) && HeroObj.SpriteObj.PosX < WindowWidth-HeroFrameWidth/4 {
-		CharacterAction = "run"
-		CharacterDirection = "right"
+	if ebiten.IsKeyPressed(ebiten.KeyRight) && env.HeroObj.SpriteObj.PosX < env.WindowWidth-env.HeroFrameWidth/4 {
+		env.CharacterAction = "run"
+		env.CharacterDirection = "right"
 		g.GameTime++
 
 		if g.GameTime > 10 {
-			if isObstacle(HeroObj.SpriteObj.PosX+HeroObj.Speed+22, HeroObj.SpriteObj.PosY) == false {
-				HeroObj.SpriteObj.PosX += HeroObj.Speed
+			if isObstacle(env.HeroObj.SpriteObj.PosX+env.HeroObj.Speed+22, env.HeroObj.SpriteObj.PosY) == false {
+				env.HeroObj.SpriteObj.PosX += env.HeroObj.Speed
 				setOldPositionCoord()
 			}
 			if canFall() == true {
-				GoingDown = true
-				CharacterAction = "jump"
+				env.GoingDown = true
+				env.CharacterAction = "jump"
 			} else {
-				GoingDown = false
-				GoingUp = false
-				StartHeigth = 0
+				env.GoingDown = false
+				env.GoingUp = false
+				env.StartHeigth = 0
 			}
 		}
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyLeft) && HeroObj.SpriteObj.PosX > 0 {
-		CharacterAction = "run"
-		CharacterDirection = "left"
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) && env.HeroObj.SpriteObj.PosX > 0 {
+		env.CharacterAction = "run"
+		env.CharacterDirection = "left"
 		g.GameTime++
 		if g.GameTime > 10 {
-			if isObstacle(HeroObj.SpriteObj.PosX-HeroObj.Speed, HeroObj.SpriteObj.PosY) == false {
-				HeroObj.SpriteObj.PosX -= HeroObj.Speed
+			if isObstacle(env.HeroObj.SpriteObj.PosX-env.HeroObj.Speed, env.HeroObj.SpriteObj.PosY) == false {
+				env.HeroObj.SpriteObj.PosX -= env.HeroObj.Speed
 				setOldPositionCoord()
 			}
 			if canFall() == true {
-				GoingDown = true
-				CharacterAction = "jump"
+				env.GoingDown = true
+				env.CharacterAction = "jump"
 			} else {
-				GoingUp = false
-				GoingDown = false
-				StartHeigth = 0
+				env.GoingUp = false
+				env.GoingDown = false
+				env.StartHeigth = 0
 			}
 		}
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeySpace) {
-		CharacterAction = "jump"
-		if StartHeigth == 0 && GoingUp == false {
-			StartHeigth = HeroObj.SpriteObj.PosY
-			GoingUp = true
-			GoingDown = false
+		env.CharacterAction = "jump"
+		if env.StartHeigth == 0 && env.GoingUp == false {
+			env.StartHeigth = env.HeroObj.SpriteObj.PosY
+			env.GoingUp = true
+			env.GoingDown = false
 		}
 	}
 
-	if inpututil.IsKeyJustReleased(ebiten.KeyRight) { //|| (GoingUp == false && GoingDown == false) {
-		CharacterAction = "idle"
-		CharacterDirection = "right"
+	if inpututil.IsKeyJustReleased(ebiten.KeyRight) { //|| (env.GoingUp == false && env.GoingDown == false) {
+		env.CharacterAction = "idle"
+		env.CharacterDirection = "right"
 	}
 	if inpututil.IsKeyJustReleased(ebiten.KeyLeft) {
-		CharacterAction = "idle"
-		CharacterDirection = "left"
+		env.CharacterAction = "idle"
+		env.CharacterDirection = "left"
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
@@ -113,91 +121,72 @@ func (g *Game) isKeyPressed() {
 }
 
 func updateHeroImage(heroImageRight []*ebiten.Image, heroImageLeft []*ebiten.Image) {
-	if CharacterDirection == "right" {
-		HeroObj.SpriteObj.ObjImg = heroImageRight
-	} else if CharacterDirection == "left" {
-		HeroObj.SpriteObj.ObjImg = heroImageLeft
+	if env.CharacterDirection == "right" {
+		env.HeroObj.SpriteObj.ObjImg = heroImageRight
+	} else if env.CharacterDirection == "left" {
+		env.HeroObj.SpriteObj.ObjImg = heroImageLeft
 	}
 }
 
 func (g *Game) drawMap() {
 	for y, line := range gameMaps.MapLevel1 {
-		//fmt.Println("y:", y, "line:", line)
+		fmt.Println("y:", y, "line:", line)
 		for x, value := range line {
 			if value == 1 {
-				g.drawPngImage(float64(x*BoxImg.FrameHeigth), float64(y*BoxImg.FrameWidth), BoxImg.Image)
-			} else if value == 99 && MapDrawed == false {
-				HeroObj.SpriteObj.PosX = float64(x * BoxImg.FrameWidth)
-				HeroObj.SpriteObj.PosY = float64(y * BoxImg.FrameHeigth)
-				MapDrawed = true
+				g.drawPngImage(float64(x*env.BoxImg.FrameHeigth), float64(y*env.BoxImg.FrameWidth), env.BoxImg.Image)
+			} else if value == 99 && env.MapDrawed == false {
+				env.HeroObj.SpriteObj.PosX = float64(x * env.BoxImg.FrameWidth)
+				env.HeroObj.SpriteObj.PosY = float64(y * env.BoxImg.FrameHeigth)
+				env.MapDrawed = true
 			}
 		}
 	}
-	MapDrawed = true
-	fmt.Println("x:", HeroObj.SpriteObj.PosX, " y:", HeroObj.SpriteObj.PosY)
+	env.MapDrawed = true
+	fmt.Println("x:", env.HeroObj.SpriteObj.PosX, " y:", env.HeroObj.SpriteObj.PosY)
 }
 
 func updateMap() {
 	//	TODO
 }
 
-func (g *Game) drawBackGround(img ImageObj) {
-	for x := 0; x < WindowWidth; x += img.FrameWidth {
+func (g *Game) drawBackGround(img env.ImageObj) {
+	for x := 0; x < env.WindowWidth; x += img.FrameWidth {
 		g.drawPngImage(float64(x), 32, img.Image)
 	}
 }
 
 func (g *Game) drawFrog() {
-	if g.Count%100 == 0 {
-		FrogJumping = true
-		Idx = 0
-	}
-	if Frog.SpriteObj.PosX < 10 {
-		FrogGoLeft = false
-	} else if Frog.SpriteObj.PosX > 860 {
-		FrogGoLeft = true
-	}
-	if FrogJumping == false && Frog.SpriteObj.PosX > 0 {
-		if FrogGoLeft == true {
-			Frog.SpriteObj.ObjImg = Frog.FrogMoves.Idle
-		} else {
-			Frog.SpriteObj.ObjImg = Frog.FrogMoves.IdleRight
-		}
-		Count = g.Count
+	frogUtils.InitFrogAction(g.Count)
+	env.FrogGoLeft = frogUtils.FrogGoLeft(10, 860)
+	if env.FrogJumping == false && env.Frog.SpriteObj.PosX > 0 {
+		frogUtils.WhichFrogIdle()
+		env.Count = g.Count
 	} else {
-		if Idx == 40 {
-			FrogJumping = false
-			Idx = 0
-		} else if Idx < 20 {
-			if FrogGoLeft == true {
-				Frog.SpriteObj.ObjImg = Frog.FrogMoves.Jump
-			} else {
-				Frog.SpriteObj.ObjImg = Frog.FrogMoves.JumpRight
-			}
-			Frog.SpriteObj.PosY -= 2
-			Count = 1
-		} else if Idx >= 20 {
-			Frog.SpriteObj.PosY += 2
-			Count = 15
+		if env.Idx == 40 {
+			env.FrogJumping = false
+			env.Idx = 0
+		} else if env.Idx < 20 {
+			frogUtils.WhichFrogJump()
+			env.Frog.SpriteObj.PosY -= 2
+			env.Count = 1
+		} else if env.Idx >= 20 {
+			env.Frog.SpriteObj.PosY += 2
+			env.Count = 15
 		}
-		Idx++
-		if FrogGoLeft == true {
-			Frog.SpriteObj.PosX -= 2
-		} else {
-			Frog.SpriteObj.PosX += 2
-		}
+		env.Idx++
+		frogUtils.IncrementFrogPos()
 	}
-	g.drawSpritesImage(Frog.SpriteObj, Count)
+	g.drawSpritesImage(env.Frog.SpriteObj, env.Count)
 }
 
 func (g *Game) drawDecoration() {
-	g.drawBackGround(BackgroundImg)
+	g.drawBackGround(env.BackgroundImg)
 
-	g.drawPngImage(320, float64(WindowHeigth-(32+HouseImg.FrameHeigth)), HouseImg.Image)
-	g.drawPngImage(820, float64(WindowHeigth-(32+HouseImg.FrameHeigth)), HouseImg.Image)
+	g.drawPngImage(320, float64(env.WindowHeigth-(32+env.HouseImg.FrameHeigth)), env.HouseImg.Image)
+	g.drawPngImage(820, float64(env.WindowHeigth-(32+env.HouseImg.FrameHeigth)), env.HouseImg.Image)
 
-	g.drawSpritesImage(CherryObj, g.Count)
-	g.drawSpritesImage(GemObj, g.Count)
+	g.drawSpritesImage(env.CherryObj, g.Count)
+	g.drawSpritesImage(env.GemObj, g.Count)
 
 	g.drawFrog()
 }
@@ -211,7 +200,7 @@ func (g *Game) drawPngImage(xPos float64, yPos float64, ImageToDraw *ebiten.Imag
 	}
 }
 
-func (g *Game) drawSpritesImage(obj SpritesObj, ticTime int) {
+func (g *Game) drawSpritesImage(obj env.SpritesObj, ticTime int) {
 	if ticTime == 0 {
 		ticTime = 1
 	}
@@ -232,53 +221,53 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.Screen = screen
 	g.drawDecoration()
 	g.drawMap()
-	g.drawHeroCharacter(&HeroObj, g.GameTime)
+	g.drawHeroCharacter(&env.HeroObj, g.GameTime)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return WindowWidth, WindowHeigth
+	return env.WindowWidth, env.WindowHeigth
 }
 
-func (g *Game) drawHeroCharacter(character *Character, ticTime int) {
+func (g *Game) drawHeroCharacter(character *env.Character, ticTime int) {
 
-	if CharacterAction == "run" && (GoingUp == false && GoingDown == false) {
+	if env.CharacterAction == "run" && (env.GoingUp == false && env.GoingDown == false) {
 		ticTime *= 2
-		updateHeroImage(HeroObj.MovesObj.RunRight, HeroObj.MovesObj.RunLeft)
+		updateHeroImage(env.HeroObj.MovesObj.RunRight, env.HeroObj.MovesObj.RunLeft)
 	}
-	if CharacterAction == "jump" || GoingUp == true || GoingDown == true {
+	if env.CharacterAction == "jump" || env.GoingUp == true || env.GoingDown == true {
 		jumpAction(character, &ticTime)
 	}
 	if canFall() == false {
-		GoingDown = false
-		CharacterAction = "idle"
+		env.GoingDown = false
+		env.CharacterAction = "idle"
 	}
-	if CharacterAction == "idle" && GoingDown == false {
-		updateHeroImage(HeroObj.MovesObj.Idle, HeroObj.MovesObj.IdleLeft)
+	if env.CharacterAction == "idle" && env.GoingDown == false {
+		updateHeroImage(env.HeroObj.MovesObj.Idle, env.HeroObj.MovesObj.IdleLeft)
 	}
 	g.drawSpritesImage(character.SpriteObj, ticTime)
-	ebitenutil.DebugPrint(g.Screen, CharacterAction)
+	ebitenutil.DebugPrint(g.Screen, env.CharacterAction)
 }
 
-func jumpAction(character *Character, ticTime *int) {
+func jumpAction(character *env.Character, ticTime *int) {
 	*ticTime = 1
-	jumpHeigth := HeroObj.SpriteObj.FrameHeight * 2
-	if character.SpriteObj.PosY == StartHeigth-float64(jumpHeigth) {
-		GoingUp = false
-		GoingDown = true
+	jumpHeigth := env.HeroObj.SpriteObj.FrameHeight * 2
+	if character.SpriteObj.PosY == env.StartHeigth-float64(jumpHeigth) {
+		env.GoingUp = false
+		env.GoingDown = true
 	}
-	if character.SpriteObj.PosY > StartHeigth-float64(jumpHeigth) && GoingUp == true {
-		GoingUp = true
-		GoingDown = false
-		character.SpriteObj.PosY -= HeroObj.Speed
-		updateHeroImage(HeroObj.MovesObj.JumpUp, HeroObj.MovesObj.JumpUpLeft)
+	if character.SpriteObj.PosY > env.StartHeigth-float64(jumpHeigth) && env.GoingUp == true {
+		env.GoingUp = true
+		env.GoingDown = false
+		character.SpriteObj.PosY -= env.HeroObj.Speed
+		updateHeroImage(env.HeroObj.MovesObj.JumpUp, env.HeroObj.MovesObj.JumpUpLeft)
 	} else if canFall() == true {
-		GoingUp = false
-		GoingDown = true
-		character.SpriteObj.PosY += HeroObj.Speed
-		updateHeroImage(HeroObj.MovesObj.JumpDown, HeroObj.MovesObj.JumpDownLeft)
+		env.GoingUp = false
+		env.GoingDown = true
+		character.SpriteObj.PosY += env.HeroObj.Speed
+		updateHeroImage(env.HeroObj.MovesObj.JumpDown, env.HeroObj.MovesObj.JumpDownLeft)
 	} else {
-		GoingUp, GoingDown = false, false
-		StartHeigth = 0
+		env.GoingUp, env.GoingDown = false, false
+		env.StartHeigth = 0
 	}
 }
 
@@ -286,7 +275,7 @@ func MakePngImageArray(SpritesNumber int, prefix, name string) []*ebiten.Image {
 	imgArr := make([]*ebiten.Image, SpritesNumber)
 	for i := 0; i < SpritesNumber; i++ {
 		spriteName := prefix + "/" + name + "-" + strconv.Itoa(i+1) + ".png"
-		path := SpritesPath + spriteName
+		path := env.SpritesPath + spriteName
 		imgArr[i] = InitPngImageFromFile(path)
 	}
 	return imgArr
@@ -298,7 +287,7 @@ func init() {
 
 func RunGame() {
 
-	ebiten.SetWindowSize(WindowWidth, WindowHeigth)
+	ebiten.SetWindowSize(env.WindowWidth, env.WindowHeigth)
 	ebiten.SetWindowTitle("Super Marie Adventures")
 	ebiten.SetWindowResizable(true)
 

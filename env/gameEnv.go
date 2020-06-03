@@ -1,4 +1,4 @@
-package runGame
+package env
 
 import "github.com/hajimehoshi/ebiten"
 
@@ -73,12 +73,6 @@ type Character struct {
 	Speed     float64
 	SpriteObj SpritesObj
 	MovesObj  MovesObj
-}
-
-type Game struct {
-	Count    int
-	GameTime int
-	Screen   *ebiten.Image
 }
 
 type FrogMoves struct {
