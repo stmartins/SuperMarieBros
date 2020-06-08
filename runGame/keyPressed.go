@@ -77,6 +77,10 @@ func (g *Game) checkKeyPressed() {
 			setOldPositionCoord()
 		}
 	}
+	if inpututil.IsKeyJustReleased(ebiten.KeySpace) {
+		env.GoingUp = false
+		env.GoingDown = true
+	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
 		os.Exit(1)
