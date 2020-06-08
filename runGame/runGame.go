@@ -19,12 +19,15 @@ func setOldPositionCoord() {
 }
 
 func isObstacle(PosX, PosY float64) bool {
-	var x, y int
-
-	x = int(PosX) / 32
+	var xr, y, xl int
+	heroHalfPixel := 10
+	xr = (int(PosX) + (env.HeroObj.SpriteObj.FrameWidth / 2) + heroHalfPixel) / 32
+	xl = (int(PosX) + (env.HeroObj.SpriteObj.FrameWidth / 2) - heroHalfPixel) / 32
 	y = int(PosY+float64(env.HeroObj.SpriteObj.FrameHeight-4)) / 32
 
-	if gameMaps.MapLevel1[y][x] == 1 {
+	if gameMaps.MapLevel1[y][xr] == 1 && env.CharacterDirection == "right" {
+		return true
+	} else if gameMaps.MapLevel1[y][xl] == 1 && env.CharacterDirection == "left" {
 		return true
 	}
 	return false
@@ -47,7 +50,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return env.WindowWidth, env.WindowHeigth
+	return outsideWidth, outsideHeight
 }
 
 func init() {

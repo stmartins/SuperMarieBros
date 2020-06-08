@@ -15,7 +15,7 @@ func (g *Game) checkKeyPressed() {
 		g.GameTime++
 
 		if g.GameTime > 10 {
-			if isObstacle(env.HeroObj.SpriteObj.PosX+env.HeroObj.Speed+22, env.HeroObj.SpriteObj.PosY) == false {
+			if isObstacle(env.HeroObj.SpriteObj.PosX, env.HeroObj.SpriteObj.PosY) == false {
 				env.HeroObj.SpriteObj.PosX += env.HeroObj.Speed
 				setOldPositionCoord()
 			}
@@ -34,7 +34,7 @@ func (g *Game) checkKeyPressed() {
 		env.CharacterDirection = "left"
 		g.GameTime++
 		if g.GameTime > 10 {
-			if isObstacle(env.HeroObj.SpriteObj.PosX-env.HeroObj.Speed, env.HeroObj.SpriteObj.PosY) == false {
+			if isObstacle(env.HeroObj.SpriteObj.PosX, env.HeroObj.SpriteObj.PosY) == false {
 				env.HeroObj.SpriteObj.PosX -= env.HeroObj.Speed
 				setOldPositionCoord()
 			}
@@ -49,15 +49,6 @@ func (g *Game) checkKeyPressed() {
 		}
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeySpace) {
-		env.CharacterAction = "jump"
-		if env.StartHeigth == 0 && env.GoingUp == false {
-			env.StartHeigth = env.HeroObj.SpriteObj.PosY
-			env.GoingUp = true
-			env.GoingDown = false
-		}
-	}
-
 	if inpututil.IsKeyJustReleased(ebiten.KeyRight) { //|| (env.GoingUp == false && env.GoingDown == false) {
 		env.CharacterAction = "idle"
 		env.CharacterDirection = "right"
@@ -65,6 +56,26 @@ func (g *Game) checkKeyPressed() {
 	if inpututil.IsKeyJustReleased(ebiten.KeyLeft) {
 		env.CharacterAction = "idle"
 		env.CharacterDirection = "left"
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeySpace) {
+		env.CharacterAction = "jump"
+		if env.StartHeigth == 0 && env.GoingUp == false {
+			env.StartHeigth = env.HeroObj.SpriteObj.PosY
+			env.GoingUp = true
+			env.GoingDown = false
+		}
+		pixelDif := float64(0)
+		if env.CharacterDirection == "right" {
+			pixelDif = 2
+		} else if env.CharacterDirection == "left" {
+			pixelDif = -3
+		}
+		if isObstacle((env.HeroObj.SpriteObj.PosX-pixelDif), env.HeroObj.SpriteObj.PosY-12) == true {
+			env.GoingUp = false
+			env.GoingDown = true
+			setOldPositionCoord()
+		}
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
