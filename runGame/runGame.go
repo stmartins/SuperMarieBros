@@ -20,7 +20,7 @@ func setOldPositionCoord() {
 
 func isObstacle(PosX, PosY float64) bool {
 	var xr, y, xl int
-	heroHalfPixel := 10
+	heroHalfPixel := 6
 	xr = (int(PosX) + (env.HeroObj.SpriteObj.FrameWidth / 2) + heroHalfPixel) / 32
 	xl = (int(PosX) + (env.HeroObj.SpriteObj.FrameWidth / 2) - heroHalfPixel) / 32
 	y = int(PosY+float64(env.HeroObj.SpriteObj.FrameHeight-4)) / 32
