@@ -21,10 +21,8 @@ func InitGame() {
 	env.GemObj = initSpriteObj("gem", "gem", 15, 13,
 		env.WindowWidth/2-float64(env.CherryObj.FrameWidth-5), env.WindowHeigth/2, 5)
 
-	env.FrogObj = initSpriteObj("Frog/idle", "Frog-idle", 35, 32, 398, 230, 4)
-	env.FrogJumpObj = initSpriteObj("Frog/jump", "Frog-jump", 35, 33, 398, 230, 2)
 	env.FrogGoLeft = true
-	env.Frog = InitFrog(398, 230, 3, "Frog/idle", "Frog-idle", 35, 32, 4)
+	env.Frog = InitFrog(398, 230, 3, "frog/idle", "frog-idle", 35, 32, 4)
 	env.OldX = 32 / 32
 	env.OldY = (env.WindowHeigth - 64) / 32
 
